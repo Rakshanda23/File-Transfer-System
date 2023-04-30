@@ -14,15 +14,19 @@ import java.util.Scanner;
 import com.mysql.cj.jdbc.JdbcStatement;
 
 public class JdbcExample {
-    private static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
-    private static final String DB_URL = "jdbc:mysql://localhost/file_transfer";
-    private static final String USERNAME = "root";
-    private static final String PASSWORD = "";
+    public static final String JDBC_DRIVER = "com.mysql.cj.jdbc.Driver";
+    public static final String DB_URL = "jdbc:mysql://localhost/file_transfer";
+    public static final String USERNAME = "root";
+    public static final String PASSWORD = "";
 
     private static Connection conn = null;
     private static PreparedStatement stmt = null;
     private static ResultSet rs = null;
 
+    public static void connectFunction(){
+//        Class.forName(JdbcExample.JDBC_DRIVER);
+//            Connection conn = DriverManager.getConnection(JdbcExample.DB_URL, JdbcExample.USERNAME, JdbcExample.PASSWORD);
+    }
     public static void getTransaction(String username) {
         try {
             String selectQuery = "SELECT * FROM transaction WHERE sender_name = '" + username
@@ -130,6 +134,7 @@ public class JdbcExample {
 
     public static Boolean insertUser(String username, String ip, String password) {
         try {
+            System.out.println("Insertion");
             String insertQuery = "INSERT INTO user (user_name, ip_address, password) VALUES (?, ?, ?)";
             stmt = conn.prepareStatement(insertQuery);
             stmt.setString(1, username);
@@ -254,6 +259,7 @@ class CommunicationThread extends Thread {
 
     public void run() {
         try {
+            
             BufferedReader brin = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             System.out.println("Connection accepted from " + clientSocket.getRemoteSocketAddress());
             System.out.println("Listening for input...");
@@ -267,6 +273,7 @@ class CommunicationThread extends Thread {
                 Boolean ip_updated = JdbcExample.updateIPaddress("rsv", "39.84.7");
                 System.out.println(ip_updated);
                 String[] inputAr = inputLine.split("<-->");
+                System.out.println(inputAr);
                 if (inputAr[0].equals("1")) {
                     JdbcExample.getTransaction(inputAr[1]);
                 } else if (inputAr[0].equals("2")) {

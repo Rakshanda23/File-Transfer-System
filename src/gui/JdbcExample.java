@@ -23,48 +23,62 @@ public class JdbcExample {
     private static PreparedStatement stmt = null;
     private static ResultSet rs = null;
 
-    public static void connectFunction(){
-//        Class.forName(JdbcExample.JDBC_DRIVER);
-//            Connection conn = DriverManager.getConnection(JdbcExample.DB_URL, JdbcExample.USERNAME, JdbcExample.PASSWORD);
-    }
-    public static void getTransaction(String username) {
+    public static void connectFunction() throws Exception{
+         Class.forName(JDBC_DRIVER);
+        conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+
+ }
+    public static String getTransaction(String username) {
         try {
+            connectFunction();
             String selectQuery = "SELECT * FROM transaction WHERE sender_name = '" + username
                     + "' ORDER BY trans_id DESC LIMIT 5";
             stmt = conn.prepareStatement(selectQuery);
             rs = stmt.executeQuery();
+            // String[] str = new String[5];
+            String str = "";
+            int i = 0;
             while (rs.next()) {
                 String filename = rs.getString("file_name");
                 String receiver = rs.getString("receiver_name");
                 Date d = rs.getDate("time");
                 System.out.println("File Name: " + filename + ", Receiver: " + receiver + ", Date : " + d);
+                str += filename + "<-->" + receiver + "<-->" + d + "|--|";
             }
-        } catch (SQLException e) {
+
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
+        return "0";
     }
 
-    public static void getUser(String username) {
+    public static String getUser(String username) {
         try {
+            connectFunction();
+
             String selectQuery = "SELECT * FROM user WHERE user_name = '" + username + "' ";
             stmt = conn.prepareStatement(selectQuery);
             rs = stmt.executeQuery();
-            if (rs.next() == false)
+            if (rs.next() == false){
                 System.out.println("User does not exist");
+                return("0");
+            }
             else {
                 String ip = rs.getString("ip_address");
                 boolean status = rs.getBoolean("status");
-                System.out.println("IP address: " + ip + ", Status : " + status);
+                return(ip+"<-->"+status);
+                // System.out.println("IP address: " + ip + ", Status : " + status);
             }
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
+        return "0";
     }
 
     public static Boolean getStatus(String username) {
         try {
+            connectFunction();
             String selectQuery = "SELECT * FROM user WHERE user_name = '" + username + "' ";
             stmt = conn.prepareStatement(selectQuery);
             rs = stmt.executeQuery();
@@ -75,29 +89,34 @@ public class JdbcExample {
             else
                 return true;
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
     }
 
-    public static int getReceiver() {
+    public static String getReceiver() {
         try {
+            connectFunction();
             String selectQuery = "SELECT * FROM user WHERE status = '" + 1 + "' ";
             stmt = conn.prepareStatement(selectQuery);
             rs = stmt.executeQuery();
+            String str = "";
             while (rs.next()) {
                 String receiver = rs.getString("user_name");
                 System.out.println(receiver);
+                str += receiver + "<-->";
             }
-        } catch (SQLException e) {
+            return str;
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        return 0;
+        return "0";
     }
 
     public static Boolean updateIPaddress(String username, String ip) {
         try {
+            connectFunction();
             String updateQuery = "UPDATE user SET ip_address = ? WHERE user_name = ?";
             stmt = conn.prepareStatement(updateQuery);
             stmt.setString(1, ip);
@@ -108,7 +127,7 @@ public class JdbcExample {
             else
                 return false; // System.out.println("Data Not updated .");
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
@@ -116,6 +135,7 @@ public class JdbcExample {
 
     public static Boolean updateStatus(String username, Boolean status) {
         try {
+            connectFunction();
             String updateQuery = "UPDATE user SET Status = ? WHERE user_name = ?";
             stmt = conn.prepareStatement(updateQuery);
             stmt.setBoolean(1, status);
@@ -126,7 +146,7 @@ public class JdbcExample {
             else
                 return false; // System.out.println("Data Not updated .");
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
@@ -134,6 +154,7 @@ public class JdbcExample {
 
     public static Boolean insertUser(String username, String ip, String password) {
         try {
+            connectFunction();
             System.out.println("Insertion");
             String insertQuery = "INSERT INTO user (user_name, ip_address, password) VALUES (?, ?, ?)";
             stmt = conn.prepareStatement(insertQuery);
@@ -147,7 +168,7 @@ public class JdbcExample {
             else
                 return false; // System.out.println("Data Not updated .");
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
@@ -158,7 +179,7 @@ public class JdbcExample {
         LocalDateTime now = LocalDateTime.now();
         Date date = Date.valueOf(dtf.format(now));
         try {
-
+            connectFunction();
             String insertQuery = "INSERT INTO transaction (file_name, sender_name, receiver_name, time) VALUES ( ?,?, ?, ?)";
             stmt = conn.prepareStatement(insertQuery);
             stmt.setString(1, filename);
@@ -172,17 +193,15 @@ public class JdbcExample {
             else
                 return false; // System.out.println("Data Not updated .");
 
-        } catch (SQLException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return false;
     }
 
     public static ServerSocket serverSocket = null;
-
-    public static void main(String[] args) throws Exception {
-
-        try {
+    public static void ServerConnection(){
+          try {
             serverSocket = new ServerSocket(4444);
         } catch (IOException e) {
             System.err.println("Could not listen on port: 4444.");
@@ -206,9 +225,8 @@ public class JdbcExample {
             }
         }
 
-        try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(DB_URL, USERNAME, PASSWORD);
+           
+            System.out.println("connection-----------");
 
             // getTransaction("abc");
 
@@ -219,8 +237,8 @@ public class JdbcExample {
 
             // getReceiver();
 
-            Boolean ip_updated = updateIPaddress("xyx", "39.84.7");
-            System.out.println(ip_updated);
+            // Boolean ip_updated = updateIPaddress("xyx", "39.84.7");
+            // System.out.println(ip_updated);
 
             // Boolean status_updated = updateStatus("xyx",false);
             // System.out.println(status_updated);
@@ -233,9 +251,7 @@ public class JdbcExample {
             //
             // System.out.println("finish");
 
-        } catch (ClassNotFoundException | SQLException e) {
-            e.printStackTrace();
-        }
+       
         // finally //////////////// DB connection close
         // {
         // try {
@@ -246,6 +262,9 @@ public class JdbcExample {
         // e.printStackTrace();
         // }
         // }
+    }
+    public static void main(String[] args) throws Exception {
+        ServerConnection();
     }
 }
 
@@ -267,43 +286,76 @@ class CommunicationThread extends Thread {
             PrintWriter pw = new PrintWriter(clientSocket.getOutputStream(), true);
 
             String inputLine;
-
+            String str="";
             while ((inputLine = brin.readLine()) != null) {
-                /////////////////////////////////////////// output from client
-                Boolean ip_updated = JdbcExample.updateIPaddress("rsv", "39.84.7");
+                System.out.println("Client here");
+                Boolean ip_updated = JdbcExample.updateIPaddress("rsv", "1819.84.7");
                 System.out.println(ip_updated);
                 String[] inputAr = inputLine.split("<-->");
-                System.out.println(inputAr);
+                System.out.println("Hello : "+inputAr[0]);
                 if (inputAr[0].equals("1")) {
-                    JdbcExample.getTransaction(inputAr[1]);
+                    
+                str = JdbcExample.getTransaction(inputAr[1]);
                 } else if (inputAr[0].equals("2")) {
-                    JdbcExample.getUser(inputAr[1]);
+                   str = JdbcExample.getUser(inputAr[1]);
                 } else if (inputAr[0].equals("3")) {
-                    JdbcExample.getStatus(inputAr[1]);
+                   Boolean b = JdbcExample.getStatus(inputAr[1]);
+                    if(b==true){
+                        str = "1";
+                    }else{
+                        str = "0";
+                    }
                 } else if (inputAr[0].equals("4")) {
-                    JdbcExample.getReceiver();
+                    str = JdbcExample.getReceiver();
                 } else if (inputAr[0].equals("5")) {
-                    JdbcExample.updateIPaddress(inputAr[1], inputAr[2]);
+                    Boolean b = JdbcExample.updateIPaddress(inputAr[1], inputAr[2]);
+                    if(b==true){
+                        str = "1";
+                    }else{
+                        str = "0";
+                    }
                 } else if (inputAr[0].equals("6")) {
                     if (inputAr[2].equals("0")) {
-                        JdbcExample.updateStatus(inputAr[1], false);
+                        Boolean b = JdbcExample.updateStatus(inputAr[1], false);
+                        if(b==true){
+                            str = "1";
+                        }else{
+                            str = "0";
+                        }
                     } else {
-                        JdbcExample.updateStatus(inputAr[1], true);
+                        Boolean b =JdbcExample.updateStatus(inputAr[1], true);
+                        if(b==true){
+                            str = "1";
+                        }else{
+                            str = "0";
+                        }
                     }
                 } else if (inputAr[0].equals("7")) {
-                    JdbcExample.insertUser(inputAr[1], inputAr[2], inputAr[3]);
+                    Boolean b = JdbcExample.insertUser(inputAr[1], inputAr[2], inputAr[3]);
+                    if(b==true){
+                        str = "1";
+                    }else{
+                        str="0";
+                    }
                 } else if (inputAr[0].equals("8")) {
-                    JdbcExample.addTransaction(inputAr[1], inputAr[2], inputAr[3]);
+                    Boolean b =JdbcExample.addTransaction(inputAr[1], inputAr[2], inputAr[3]);
+                    if(b==true){
+                        str = "1";
+                    }else{
+                        str = "0";
+                    }
                 }
-                System.out.println("Client: " + inputLine);
+
+                //System.out.println("Client: " + inputLine+"dkfjk;djfgkidrjg");
 
                 /////////////////////////////////////////// input to server
 
                 System.out.println("aaa");
                 Scanner sc = new Scanner(System.in);
-                String str = sc.nextLine();
 
-                System.out.println("bbbb");
+                // System.out.println("bbbb");
+                // if (str.equals("Bbye")) {
+                  System.out.println("bbbb");
                 if (str.equals("Bbye")) {
                     System.out.println("cccc");
                     pw.println("Connection close");
@@ -317,9 +369,10 @@ class CommunicationThread extends Thread {
                 } else {
                     pw.println(str);
                 }
+
             }
         } catch (Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
     }
 }

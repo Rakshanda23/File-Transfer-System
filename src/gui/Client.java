@@ -8,7 +8,7 @@ public class Client
 	{String inputLine;
 		try	
 		{
-			Socket s = new Socket("192.168.1.4", 4444);
+			Socket s = new Socket("192.168.1.117", 4444);
 			BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
 			PrintWriter pw = new PrintWriter(s.getOutputStream(), true);
 			Scanner sc = new Scanner(System.in);

@@ -2,12 +2,13 @@ import java.net.*;
 import java.io.*;
 import java.util.*;
 
+
 public class Client {
 	public static Boolean sendUserData(String username, String ip, String password) {
 		String inputLine;
 		try {
 			Socket s = new Socket("192.168.1.4", 4444);
-			BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
+                        BufferedReader in = new BufferedReader(new InputStreamReader(s.getInputStream()));
 			PrintWriter pw = new PrintWriter(s.getOutputStream(), true);
 			System.out.println("Connection established with " + s.getRemoteSocketAddress());
 			//////////////////////////////////////////// msg from client
